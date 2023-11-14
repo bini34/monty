@@ -40,9 +40,9 @@ By the end of this project, you are expected to understand:
 
 Before diving into the project, make sure to review the following:
 
-- [Google](https://www.google.com)
-- [How do I use extern to share variables between source files in C?](https://www.google.com) (Google search recommended)
-- Stacks and Queues in C
+- [Google](https://www.google.com/webhp?q=stack%20and%20queue)
+- [How do I use extern to share variables between source files in C?](https://www.google.com/webhp?q=stack%20and%20queue) (Google search recommended)
+- Stacks and Queues in C]
 - Stack operations
 - Queue operations
 
