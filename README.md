@@ -1,4 +1,5 @@
 # Monty Project
+![Alt Text](CFYYWy6UEAE9Ow-.png)
 
 ## Introduction
 
