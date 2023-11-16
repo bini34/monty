@@ -31,8 +31,8 @@ typedef struct instruction_s
 
 /* Function prototypes */
 void execute_operations(FILE *file, stack_t **stack);
-void push(stack_t **stack, int value);
-void pall(stack_t **stack);
+void push(stack_t **stack, unsigned int value);
+void pall(stack_t **stack, unsigned int line_number);
 void free_stack(stack_t *stack);
 void swap(stack_t **stack,unsigned int line_number);
 void add(stack_t **stack, unsigned int line_number);
@@ -41,5 +41,6 @@ void divide(stack_t **stack, unsigned int line_number);
 void mul(stack_t **stack, unsigned int line_number);
 void mod(stack_t **stack, unsigned int line_number);
 void pchar(stack_t **stack, unsigned int line_number);
+void nop(stack_t **stack, unsigned int line_number);
 
 #endif /* MONTY_H */

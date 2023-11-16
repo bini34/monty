@@ -4,7 +4,7 @@
  * @stack: Double pointer to the stack.
  * @value: Value to be pushed onto the stack.
  */
-void push(stack_t **stack, int value)
+void push(stack_t **stack, unsigned int value)
 {
 	stack_t *new_node = malloc(sizeof(stack_t));
 
@@ -14,7 +14,7 @@ void push(stack_t **stack, int value)
 		free_stack(*stack);
 		exit(EXIT_FAILURE);
 	}
-	new_node->n = value;
+	new_node->n = (int)value;
 	new_node->prev = NULL;
 	new_node->next = *stack;
 
@@ -26,9 +26,10 @@ void push(stack_t **stack, int value)
  * pall - Prints all elements in the stack.
  * @stack: Double pointer to the stack.
  */
-void pall(stack_t **stack)
+void pall(stack_t **stack, unsigned int line_number)
 {
 	stack_t *current;
+	(void)line_number;
 
 	current = *stack;
 
@@ -78,4 +79,9 @@ void pchar(stack_t **stack, unsigned int line_number)
 	}
 	ascichar = (char)((*stack)->n);
 	fprintf(stdout, "%c", ascichar);
+}
+void nop(stack_t **stack, unsigned int line_number)
+{
+	(void)*stack;
+	(void)line_number;
 }
