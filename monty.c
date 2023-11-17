@@ -7,7 +7,6 @@
  * @opcode: Operation code.
  * @line_number: Line number being processed.
  *
- * Description: This function executes Monty operations other than "push."
  */
 void process(stack_t **stack, const char *opcode, unsigned int line_number)
 {
@@ -33,8 +32,6 @@ void process(stack_t **stack, const char *opcode, unsigned int line_number)
  * @file: File pointer to the Monty bytecode file.
  * @stack: Double pointer to the stack.
  *
- * Description: This function reads Monty bytecode from a file and executes
- *              the corresponding operations on the stack.
  */
 void execute_operations(FILE *file, stack_t **stack)
 {
@@ -52,7 +49,7 @@ void execute_operations(FILE *file, stack_t **stack)
 				fprintf(stderr, "L%d: Error: usage: push integer\n", line_number);
 				exit(EXIT_FAILURE);
 			}
-			process_push(stack, value, line_number);
+			push(stack, value);
 		}
 		else
 			process(stack, opcode, line_number);
@@ -67,8 +64,6 @@ void execute_operations(FILE *file, stack_t **stack)
  * @argv: Array of command line argument strings.
  * Return: EXIT_SUCCESS on success, EXIT_FAILURE on failure.
  *
- * Description: This function is the entry point for the Monty interpreter.
- *              It reads Monty bytecode from a file and executes operations.
  */
 int main(int argc, char *argv[])
 {
