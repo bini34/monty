@@ -1,84 +1,68 @@
 #include "monty.h"
 
 /**
- * process_file - Reads and processes the Monty bytecode file.
+ * execute_operations - Parses the file and executes the Monty operations.
  * @file: File pointer to the Monty bytecode file.
  * @stack: Double pointer to the stack.
  */
-void process_file(FILE *file, stack_t **stack)
+void execute_operations(FILE *file, stack_t **stack)
 {
-	char *line = NULL, *opcode, *arg;
-	size_t len = 1024;
-	int value, i;
+    char opcode[100];
+    int value;
+    unsigned int line_number = 0;
 
-	instruction_t instructions[] = {{"push", push}, {"pall", pall},
-		{"swap", swap}, {"add", add}, {"pchar", pchar}, {"sub", sub},
-		{"div", divide}, {"mul", mul}, {"mod", mod}, {"nop", nop},
-		{NULL, NULL}};
-	line = (char *)malloc(len);
-	if (line == NULL)
-	{
-		fprintf(stderr, "Error: Memory allocation failed\n");
-		exit(EXIT_FAILURE);
-	}
-	while (fgets(line, len, file) != NULL)
-	{
-		opcode = strtok(line, " \n\t");
-		if (opcode == NULL || opcode[0] == '#')
-			continue;
-		for (i = 0; instructions[i].opcode != NULL; i++)
-		{
-			if (strcmp(opcode, instructions[i].opcode) == 0)
-			{
-				if (strcmp(opcode, "push") == 0)
-				{
-					arg = strtok(NULL, " \n\t");
-					if (arg == NULL)
-					{
-						fprintf(stderr, "Error: %s requires an argument\n", opcode);
-						fclose(file);
-						free_stack(*stack);
-						free(line);
-						exit(EXIT_FAILURE);
-					}
-					value = atoi(arg);
-					instructions[i].f(stack, value);
-				}
-				else
-					instructions[i].f(stack, __LINE__);
-				break;
-			}
-		}
-		if (instructions[i].opcode == NULL)
-		{
-			fprintf(stderr, "L%d: unknown instruction %s\n", __LINE__, opcode);
-			fclose(file);
-			free_stack(*stack);
-			free(line);
-			exit(EXIT_FAILURE);
-		}
-	}
-	free(line);
-}
-/**
- * execute_file - Executes Monty operations based on the file contents.
- * @filename: Name of the Monty bytecode file.
- */
-void execute_file(const char *filename)
-{
-	FILE *file;
-	stack_t *stack;
+    while (fscanf(file, "%99s", opcode) == 1)
+    {
+        if (strcmp(opcode, "push") == 0)
+        {
+            if (fscanf(file, "%d", &value) != 1)
+            {
+                fprintf(stderr, "L%d: Error: usage: push integer\n", line_number);
+                fclose(file);
+                free_stack(*stack);
+                exit(EXIT_FAILURE);
+            }
+            push(stack, value);
+        }
+        else
+        {
+            int i;
 
-	file = fopen(filename, "r");
-	if (!file)
-	{
-		fprintf(stderr, "Error: Can't open file %s\n", filename);
-		exit(EXIT_FAILURE);
-	}
-	stack = NULL;
-	process_file(file, &stack);
-	fclose(file);
-	free_stack(stack);
+            instruction_t instructions[] = {
+                {"pall", pall},
+                {"swap", swap},
+                {"add", add},
+                {"pchar", pchar},
+                {"sub", sub},
+                {"div", divide},
+                {"mul", mul},
+                {"mod", mod},
+                {"nop", nop},
+                {NULL, NULL}};
+
+            for (i = 0; instructions[i].opcode != NULL; i++)
+            {
+                if (strcmp(opcode, instructions[i].opcode) == 0)
+                {
+                    instructions[i].f(stack, line_number);
+                    break;
+                }
+            }
+
+            if (instructions[i].opcode == NULL)
+            {
+                fprintf(stderr, "L%d: Unknown instruction %s\n", line_number, opcode);
+                fclose(file);
+                free_stack(*stack);
+                exit(EXIT_FAILURE);
+            }
+        }
+
+        fscanf(file, "%*[^\n]");
+        fgetc(file);
+
+        line_number++;
+    }
 }
 
 /**
@@ -89,11 +73,26 @@ void execute_file(const char *filename)
  */
 int main(int argc, char *argv[])
 {
-	if (argc != 2)
-	{
-		fprintf(stderr, "USAGE: monty file\n");
-		exit(EXIT_FAILURE);
-	}
-	execute_file(argv[1]);
-	return (EXIT_SUCCESS);
+    FILE *file;
+    stack_t *stack;
+
+    if (argc != 2)
+    {
+        fprintf(stderr, "USAGE: monty file\n");
+        exit(EXIT_FAILURE);
+    }
+
+    file = fopen(argv[1], "r");
+    if (!file)
+    {
+        fprintf(stderr, "Error: Can't open file %s\n", argv[1]);
+        exit(EXIT_FAILURE);
+    }
+
+    stack = NULL;
+    execute_operations(file, &stack);
+    fclose(file);
+    free_stack(stack);
+    return (EXIT_SUCCESS);
 }
+

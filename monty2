@@ -1,0 +1,167 @@
+#include "monty.h"
+/**
+ * my_strdup - Duplicate a string.
+ * @str: The string to duplicate.
+ * Return: A pointer to the newly allocated duplicate string.
+ */
+char *my_strdup(const char *str)
+{
+    size_t len = strlen(str) + 1;
+    char *duplicate = malloc(len);
+
+    if (duplicate == NULL)
+    {
+        fprintf(stderr, "Error: Memory allocation failed\n");
+        exit(EXIT_FAILURE);
+    }
+
+    return strcpy(duplicate, str);
+}
+/**
+ * parse_line - Parse a line into command and argument.
+ * @line: The line to parse.
+ * @command: Output parameter for the command.
+ * @arg: Output parameter for the argument.
+ */
+void parse_line(char *line, char **command, char **arg)
+{
+    const char *delimiters = " \t\n";
+    char *line_copy = my_strdup(line);
+	int i;
+
+    printf("Parsing line: ");
+    for (i = 0; line_copy[i] != '\0'; i++) {
+        printf("%c", line_copy[i]);
+    }
+    printf("\n");
+
+    *command = strtok(line_copy, delimiters);
+    if (*command != NULL && (*command)[0] == '#') {
+        *command = NULL;
+        free(line_copy);
+        return;
+    }
+
+    *arg = strtok(NULL, delimiters);
+    if (*arg != NULL && (*arg)[0] == '#')
+        *arg = NULL;
+
+    free(line_copy);
+}
+
+/**
+ * process_file - Reads and processes the Monty bytecode file.
+ * @file: File pointer to the Monty bytecode file.
+ * @stack: Double pointer to the stack.
+ */
+void process_file(FILE *file, stack_t **stack)
+{
+    char *line = NULL, *opcode, *arg;
+    size_t len = 1024;
+    int i;
+    unsigned int counter = 0;
+
+    instruction_t instructions[] = {{"push", push}, {"pall", pall},
+                                    {"swap", swap}, {"add", add}, {"pchar", pchar}, {"sub", sub},
+                                    {"div", divide}, {"mul", mul}, {"mod", mod}, {"nop", nop},
+                                    {NULL, NULL}};
+    line = (char *)malloc(len);
+    if (line == NULL)
+    {
+        fprintf(stderr, "Error: Memory allocation failed\n");
+        exit(EXIT_FAILURE);
+    }
+
+    while (fgets(line, len, file) != NULL)
+    {
+        counter++;
+        parse_line(line, &opcode, &arg);
+
+        if (opcode == NULL || is_blank_line(opcode))
+            continue;
+
+        for (i = 0; instructions[i].opcode != NULL; i++)
+        {
+            if (strcmp(opcode, instructions[i].opcode) == 0)
+            {
+                if (strcmp(opcode, "push") == 0)
+                {
+                    if (arg == NULL)
+                    {
+                        fprintf(stderr, "Error: %s requires an argument\n", opcode);
+                        fclose(file);
+                        free_stack(*stack);
+                        free(line);
+                        exit(EXIT_FAILURE);
+                    }
+                    instructions[i].f(stack, counter);
+                }
+                else
+                    instructions[i].f(stack, counter);
+                break;
+            }
+        }
+        if (instructions[i].opcode == NULL)
+        {
+            fprintf(stderr, "L%d: unknown instruction %s\n", counter, opcode);
+            fclose(file);
+            free_stack(*stack);
+            free(line);
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    free(line);
+}
+/**
+ * is_blank_line - Checks if a line is blank (empty or made of spaces only).
+ * @line: The line to check.
+ * Return: 1 if the line is blank, 0 otherwise.
+ */
+int is_blank_line(const char *line)
+{
+    while (*line != '\0')
+    {
+        if (!isspace(*line))
+            return 0;
+        line++;
+    }
+    return 1;
+}
+/**
+ * execute_file - Executes Monty operations based on the file contents.
+ * @filename: Name of the Monty bytecode file.
+ */
+void execute_file(const char *filename)
+{
+	FILE *file;
+	stack_t *stack;
+
+	file = fopen(filename, "r");
+	if (!file)
+	{
+		fprintf(stderr, "Error: Can't open file %s\n", filename);
+		exit(EXIT_FAILURE);
+	}
+	stack = NULL;
+	process_file(file, &stack);
+	fclose(file);
+	free_stack(stack);
+}
+
+/**
+ * main - Entry point for the Monty interpreter.
+ * @argc: Number of command line arguments.
+ * @argv: Array of command line argument strings.
+ * Return: EXIT_SUCCESS on success, EXIT_FAILURE on failure.
+ */
+int main(int argc, char *argv[])
+{
+	if (argc != 2)
+	{
+		fprintf(stderr, "USAGE: monty file\n");
+		exit(EXIT_FAILURE);
+	}
+	execute_file(argv[1]);
+	return (EXIT_SUCCESS);
+}
