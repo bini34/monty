@@ -1,9 +1,43 @@
 #include "monty.h"
 
+
 /**
- * execute_operations - Parses the file and executes the Monty operations.
+ * process_instruction - Executes non-"push" Monty operations.
+ * @stack: Double pointer to the stack.
+ * @opcode: Operation code.
+ * @line_number: Line number being processed.
+ *
+ * Description: This function executes Monty operations other than "push."
+ */
+void process_instruction(stack_t **stack, const char *opcode, unsigned int line_number)
+{
+    int i;
+    instruction_t instructions[] = {
+        {"pall", pall}, {"swap", swap}, {"add", add}, {"pchar", pchar},
+        {"sub", sub}, {"div", divide}, {"mul", mul}, {"mod", mod},
+        {"nop", nop}, {NULL, NULL}
+    };
+
+    for (i = 0; instructions[i].opcode != NULL; i++)
+    {
+        if (strcmp(opcode, instructions[i].opcode) == 0)
+        {
+            instructions[i].f(stack, line_number);
+            return;
+        }
+    }
+
+    fprintf(stderr, "L%d: Unknown instruction %s\n", line_number, opcode);
+    exit(EXIT_FAILURE);
+}
+
+/**
+ * execute_operations - Parses and executes Monty operations from a file.
  * @file: File pointer to the Monty bytecode file.
  * @stack: Double pointer to the stack.
+ *
+ * Description: This function reads Monty bytecode from a file and executes
+ *              the corresponding operations on the stack.
  */
 void execute_operations(FILE *file, stack_t **stack)
 {
@@ -13,55 +47,24 @@ void execute_operations(FILE *file, stack_t **stack)
 
     while (fscanf(file, "%99s", opcode) == 1)
     {
+        line_number++;
+
         if (strcmp(opcode, "push") == 0)
         {
             if (fscanf(file, "%d", &value) != 1)
             {
                 fprintf(stderr, "L%d: Error: usage: push integer\n", line_number);
-                fclose(file);
-                free_stack(*stack);
                 exit(EXIT_FAILURE);
             }
-            push(stack, value);
+            process_push(stack, value, line_number);
         }
         else
         {
-            int i;
-
-            instruction_t instructions[] = {
-                {"pall", pall},
-                {"swap", swap},
-                {"add", add},
-                {"pchar", pchar},
-                {"sub", sub},
-                {"div", divide},
-                {"mul", mul},
-                {"mod", mod},
-                {"nop", nop},
-                {NULL, NULL}};
-
-            for (i = 0; instructions[i].opcode != NULL; i++)
-            {
-                if (strcmp(opcode, instructions[i].opcode) == 0)
-                {
-                    instructions[i].f(stack, line_number);
-                    break;
-                }
-            }
-
-            if (instructions[i].opcode == NULL)
-            {
-                fprintf(stderr, "L%d: Unknown instruction %s\n", line_number, opcode);
-                fclose(file);
-                free_stack(*stack);
-                exit(EXIT_FAILURE);
-            }
+            process_instruction(stack, opcode, line_number);
         }
 
         fscanf(file, "%*[^\n]");
         fgetc(file);
-
-        line_number++;
     }
 }
 
@@ -70,6 +73,9 @@ void execute_operations(FILE *file, stack_t **stack)
  * @argc: Number of command line arguments.
  * @argv: Array of command line argument strings.
  * Return: EXIT_SUCCESS on success, EXIT_FAILURE on failure.
+ *
+ * Description: This function is the entry point for the Monty interpreter.
+ *              It reads Monty bytecode from a file and executes operations.
  */
 int main(int argc, char *argv[])
 {
@@ -93,6 +99,6 @@ int main(int argc, char *argv[])
     execute_operations(file, &stack);
     fclose(file);
     free_stack(stack);
-    return (EXIT_SUCCESS);
+    return EXIT_SUCCESS;
 }
 
