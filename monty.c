@@ -14,7 +14,7 @@ void process(stack_t **stack, const char *opcode, unsigned int line_number)
 	instruction_t instructions[] = {
 		{"pall", pall}, {"swap", swap}, {"add", add}, {"pchar", pchar},
 		{"sub", sub}, {"div", divide}, {"mul", mul}, {"mod", mod},
-		{"nop", nop}, {NULL, NULL}
+		{"nop", nop}, {"pint", pint}, {"pop", pop}, {NULL, NULL}
 	};
 	for (i = 0; instructions[i].opcode != NULL; i++)
 	{
