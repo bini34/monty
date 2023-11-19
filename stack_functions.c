@@ -25,6 +25,7 @@ void push(stack_t **stack, unsigned int value)
 /**
  * pall - Prints all elements in the stack.
  * @stack: Double pointer to the stack.
+ * @line_number: Line number in the Monty bytecode file.
  */
 void pall(stack_t **stack, unsigned int line_number)
 {
@@ -80,6 +81,11 @@ void pchar(stack_t **stack, unsigned int line_number)
 	ascichar = (char)((*stack)->n);
 	fprintf(stdout, "%c", ascichar);
 }
+/**
+ * nop - noting it do
+ * @stack: Double pointer to the stack.
+ * @line_number: Line number.
+ */
 void nop(stack_t **stack, unsigned int line_number)
 {
 	(void)*stack;
